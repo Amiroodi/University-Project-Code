@@ -1,11 +1,7 @@
 import os
 import pandas as pd
-from pathlib import Path
-from torch import load
 from torch.utils.data import Dataset, DataLoader, Subset
-import torchvision.transforms as transforms
 import albumentations as A
-import numpy as np
 import cv2
 from sklearn.model_selection import KFold
 from torch.utils.data import ConcatDataset
@@ -23,14 +19,12 @@ APTOS_train_csv_file = "../../APTOS/labels/trainLabels19.csv"
 APTOS_test_image_folder = "../../APTOS/resized_test_15"
 APTOS_test_csv_file = "../../APTOS/labels/testLabels15.csv"  
 
-# NUM_WORKERS = os.cpu_count()
 NUM_WORKERS = 4
 
 class LoadDataset_IDRID(Dataset):
     def __init__(self, image_folder, csv_file, transform=None):
         self.image_folder = image_folder
-        self.df = pd.read_csv(csv_file) # Load the CSV file
-        # self.df = self.df[~self.df.iloc[:, 0].str.contains("test", case=False, na=False)].reset_index(drop=True) 
+        self.df = pd.read_csv(csv_file)
         self.transform = transform
         
     def __len__(self):
@@ -56,8 +50,7 @@ class LoadDataset_IDRID(Dataset):
 class LoadDataset_MESSIDOR(Dataset):
     def __init__(self, image_folder, csv_file, transform=None):
         self.image_folder = image_folder
-        self.df = pd.read_csv(csv_file) # Load the CSV file
-        # self.df = self.df[~self.df.iloc[:, 0].str.contains("test", case=False, na=False)].reset_index(drop=True) 
+        self.df = pd.read_csv(csv_file)
         self.transform = transform
         
     def __len__(self):
@@ -83,8 +76,7 @@ class LoadDataset_MESSIDOR(Dataset):
 class LoadDataset_APOTS(Dataset):
     def __init__(self, image_folder, csv_file, transform=None):
         self.image_folder = image_folder
-        self.df = pd.read_csv(csv_file) # Load the CSV file
-        # self.df = self.df[~self.df.iloc[:, 0].str.contains("test", case=False, na=False)].reset_index(drop=True) 
+        self.df = pd.read_csv(csv_file) 
         self.transform = transform
         
     def __len__(self):
@@ -107,13 +99,6 @@ class LoadDataset_APOTS(Dataset):
             
         return image, label
     
-class PreloadedDataset(Dataset):
-    def __init__(self, path):
-        self.path = path
-
-    def __getitem__(self, idx):
-        return load(f"{self.path}/{idx}.pt", weights_only=False)
-
 def create_train_val_dataloader(
     transform: A.Compose,
     batch_size: int, 
@@ -122,14 +107,10 @@ def create_train_val_dataloader(
     ):
   
     # combine all datasets
-    # train_dataset_1 = LoadDataset_IDRID(IDRID_image_folder, IDRID_csv_file, transform=transform)
-    # train_dataset_2 = LoadDataset_MESSIDOR(MESSIDOR_image_folder, MESSIDOR_csv_file, transform=transform)
+    train_dataset_1 = LoadDataset_IDRID(IDRID_image_folder, IDRID_csv_file, transform=transform)
+    train_dataset_2 = LoadDataset_MESSIDOR(MESSIDOR_image_folder, MESSIDOR_csv_file, transform=transform)
     train_dataset_3 = LoadDataset_APOTS(APTOS_train_image_folder, APTOS_train_csv_file, transform=transform)
-    # combined_dataset = ConcatDataset([train_dataset_1, train_dataset_2, train_dataset_3])
-    # combined_dataset = PreloadedDataset('./data/main')
-    # print(combined_dataset[0][0].shape)
-    combined_dataset = train_dataset_3
-
+    combined_dataset = ConcatDataset([train_dataset_1, train_dataset_2, train_dataset_3])
 
     # Shrinking dataset size for test purposes
     if shrink_size is not None:
@@ -157,8 +138,6 @@ def create_train_val_dataloader(
     # Get class names
     class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
 
-    # Turn images into data loaders
-
     return train_val_dataloader, class_names
 
 def create_test_dataloader(
@@ -178,7 +157,6 @@ def create_test_dataloader(
     # Get class names
     class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
 
-    # Turn images into data loaders
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
     return test_dataloader, class_names
@@ -203,7 +181,6 @@ def create_train_dataloader(
     # Get class names
     class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
 
-    # Turn images into data loaders
     train_dataloader = DataLoader(combined_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
     return train_dataloader, class_names
