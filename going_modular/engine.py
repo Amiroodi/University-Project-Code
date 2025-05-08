@@ -267,17 +267,18 @@ def train(
         acc_classification_val, acc_regression_val, acc_ordinal_val = accs
 
         # Print out what's happening
-        print(
-            f"Epoch: {epoch+1}\n"
-            f"loss_classification_train: {loss_classification_train:.4f} | "
-            f"loss_regression_train: {loss_regression_train:.4f} | "
-            f"loss_ordinal_train: {loss_ordinal_train:.4f}\n"
-            f"loss_classification_validation: {loss_classification_val:.4f} | "
-            f"loss_regression_validation: {loss_regression_val:.4f} | "
-            f"loss_ordinal_validation: {loss_ordinal_val:.4f}\n"
-            f"acc_classification_validation: {acc_classification_val:.4f} | "
-            f"acc_regression_validation: {acc_regression_val:.4f} | "
-            f"acc_ordinal_validation: {acc_ordinal_val:.4f}\n")
+        if epoch % 5 == 0:
+            print(
+                f"Epoch: {epoch+1}\n"
+                f"loss_classification_train: {loss_classification_train:.4f} | "
+                f"loss_regression_train: {loss_regression_train:.4f} | "
+                f"loss_ordinal_train: {loss_ordinal_train:.4f}\n"
+                f"loss_classification_validation: {loss_classification_val:.4f} | "
+                f"loss_regression_validation: {loss_regression_val:.4f} | "
+                f"loss_ordinal_validation: {loss_ordinal_val:.4f}\n"
+                f"acc_classification_validation: {acc_classification_val:.4f} | "
+                f"acc_regression_validation: {acc_regression_val:.4f} | "
+                f"acc_ordinal_validation: {acc_ordinal_val:.4f}\n")
 
         # Update results dictionary
         train_results["loss_classification_train"].append(loss_classification_train)
@@ -322,11 +323,12 @@ def pre_train(
             device=device)
         
         # Print out what's happening
-        print(
-            f"Epoch: {epoch+1}\n"
-            f"loss_classification_train: {loss_classification_train:.4f} | "
-            f"loss_regression_train: {loss_regression_train:.4f} | "
-            f"loss_ordinal_train: {loss_ordinal_train:.4f}\n")
+        if epoch % 4 == 0:
+            print(
+                f"Epoch: {epoch+1}\n"
+                f"loss_classification_train: {loss_classification_train:.4f} | "
+                f"loss_regression_train: {loss_regression_train:.4f} | "
+                f"loss_ordinal_train: {loss_ordinal_train:.4f}\n")
 
         # Update results dictionary
         train_results["loss_classification_train"].append(loss_classification_train)

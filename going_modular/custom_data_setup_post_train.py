@@ -5,7 +5,7 @@ from going_modular.ThreeHeadCNN import ThreeHeadCNN
 import albumentations as A
 from sklearn.model_selection import KFold
 
-NUM_WORKERS = 4
+NUM_WORKERS = 0
 
 class LoadDataset(Dataset):
     def __init__(self, model, dataloader, device):
@@ -35,7 +35,7 @@ def create_train_val_dataloader(
 
     train_dataloader, class_names = custom_data_setup_main_train.create_train_dataloader(
         transform=transform, 
-        batch_size=32,
+        batch_size=32, # batch size is not importants here
         shrink_size=shrink_size) 
     
     train_dataset = LoadDataset(model=model, dataloader=train_dataloader, device=device)
@@ -82,7 +82,7 @@ def create_test_dataloader(
 
     test_dataloader, class_names = custom_data_setup_main_train.create_test_dataloader(
         transform=transform,
-        batch_size=32,
+        batch_size=32, # batch size is not importants here
         shrink_size=shrink_size)
     
     test_dataset = LoadDataset(model=model, dataloader=test_dataloader, device=device)
@@ -97,3 +97,33 @@ def create_test_dataloader(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
     return test_dataloader, class_names
+
+def create_train_dataloader(
+    transform: A.Compose,
+    batch_size: int, 
+    device,
+    shrink_size: int,
+    num_workers: int=NUM_WORKERS,
+    ):
+
+    model = ThreeHeadCNN().to(device)
+    # load trained model's weights
+    model.load_state_dict(torch.load("models/main_train_model.pth", map_location=device))
+
+    train_dataloader, class_names = custom_data_setup_main_train.create_train_dataloader(
+        transform=transform,
+        batch_size=32, # batch size is not importants here
+        shrink_size=shrink_size)
+    
+    train_dataset = LoadDataset(model=model, dataloader=train_dataloader, device=device)
+
+    # Shrinking dataset size for test purposes
+    if shrink_size is not None:
+        train_dataset = Subset(train_dataset, range(shrink_size))
+
+    # Get class names
+    class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
+
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+
+    return train_dataloader, class_names

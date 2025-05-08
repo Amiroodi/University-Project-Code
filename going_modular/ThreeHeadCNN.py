@@ -21,7 +21,6 @@ class ThreeHeadCNN(nn.Module):
 
         self.dense1 = nn.Linear(1280 * 2, 512)
 
-
         # Classification head
         self.classification_head = nn.Sequential(
             nn.Linear(512, 128),
