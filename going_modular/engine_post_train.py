@@ -3,6 +3,7 @@ from torch import nn
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 from torchmetrics.classification import MulticlassF1Score
+from torchmetrics.classification import MulticlassCohenKappa
 
 def reg_classify(x, device):
     bins = torch.tensor([0.5, 1.5, 2.5, 3.5]).to(device)  # Class boundaries
@@ -112,6 +113,9 @@ def test_step(model: torch.nn.Module,
 
     # Setup test loss and test accuracy values
     acc = 0
+    QWK_score = 0
+    QWK_metric = MulticlassCohenKappa(num_classes=5)
+    temp = 0
 
     # Turn on inference context manager
     with torch.inference_mode():
@@ -128,10 +132,16 @@ def test_step(model: torch.nn.Module,
             y_pred = reg_classify(out, device=device).to(device)
             acc += (y_pred == y).sum().item()/len(y)
 
+            
+            QWK_score += QWK_metric(y_pred, y)
 
     # Adjust metrics to get average loss and accuracy per batch 
     acc /= len(dataloader) 
     print(f'test acc: {acc}')
+
+    QWK_score = QWK_score.clone()
+    QWK_score /= len(dataloader)
+    print(f'QWK score: {QWK_score}')
 
     return acc
 

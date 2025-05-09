@@ -31,7 +31,7 @@ def create_train_val_dataloader(
 
     model = ThreeHeadCNN().to(device)
     # load trained model's weights
-    model.load_state_dict(torch.load("models/main_train_model.pth", map_location=device))
+    model.load_state_dict(torch.load("models/main_train_model.pth",weights_only=True, map_location=device))
 
     train_dataloader, class_names = custom_data_setup_main_train.create_train_dataloader(
         transform=transform, 
@@ -78,7 +78,7 @@ def create_test_dataloader(
 
     model = ThreeHeadCNN().to(device)
     # load trained model's weights
-    model.load_state_dict(torch.load("models/main_train_model.pth", map_location=device))
+    model.load_state_dict(torch.load("models/main_train_model.pth", weights_only=True, map_location=device))
 
     test_dataloader, class_names = custom_data_setup_main_train.create_test_dataloader(
         transform=transform,
@@ -108,7 +108,7 @@ def create_train_dataloader(
 
     model = ThreeHeadCNN().to(device)
     # load trained model's weights
-    model.load_state_dict(torch.load("models/main_train_model.pth", map_location=device))
+    model.load_state_dict(torch.load("models/main_train_model.pth", weights_only=True, map_location=device))
 
     train_dataloader, class_names = custom_data_setup_main_train.create_train_dataloader(
         transform=transform,
