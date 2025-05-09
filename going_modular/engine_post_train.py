@@ -192,7 +192,7 @@ def train(model: torch.nn.Module,
         
         # Print out what's happening
         print(
-          f"Epoch: {epoch+1}\n"
+          f"Epoch: {epoch}\n"
           f"loss_train: {loss_train:.4f} | "
           f"loss_val: {loss_val:.4f} | "
           f"acc_val: {acc_val:.4f}\n"

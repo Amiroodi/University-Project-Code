@@ -269,7 +269,7 @@ def train(
         # Print out what's happening
         if epoch % 5 == 0:
             print(
-                f"Epoch: {epoch+1}\n"
+                f"Epoch: {epoch}\n"
                 f"loss_classification_train: {loss_classification_train:.4f} | "
                 f"loss_regression_train: {loss_regression_train:.4f} | "
                 f"loss_ordinal_train: {loss_ordinal_train:.4f}\n"
@@ -325,7 +325,7 @@ def pre_train(
         # Print out what's happening
         if epoch % 4 == 0:
             print(
-                f"Epoch: {epoch+1}\n"
+                f"Epoch: {epoch}\n"
                 f"loss_classification_train: {loss_classification_train:.4f} | "
                 f"loss_regression_train: {loss_regression_train:.4f} | "
                 f"loss_ordinal_train: {loss_ordinal_train:.4f}\n")
