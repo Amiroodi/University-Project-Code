@@ -19,7 +19,7 @@ APTOS_train_csv_file = "../../APTOS/labels/trainLabels19.csv"
 APTOS_test_image_folder = "../../APTOS/resized_test_15"
 APTOS_test_csv_file = "../../APTOS/labels/testLabels15.csv"  
 
-NUM_WORKERS = 4
+NUM_WORKERS = 0
 
 class LoadDataset_IDRID(Dataset):
     def __init__(self, image_folder, csv_file, transform=None):
@@ -126,8 +126,8 @@ def create_train_val_dataloader(
         train_subset = Subset(combined_dataset, train_idx)
         val_subset = Subset(combined_dataset, val_idx)
 
-        train_dataloader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
-        val_dataloader = DataLoader(val_subset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
+        train_dataloader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=False, pin_memory=True)
+        val_dataloader = DataLoader(val_subset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=False, pin_memory=True)
 
         fold = {
                 'train_dataloader': train_dataloader,
@@ -181,6 +181,6 @@ def create_train_dataloader(
     # Get class names
     class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
 
-    train_dataloader = DataLoader(combined_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+    train_dataloader = DataLoader(combined_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, persistent_workers=False, pin_memory=True)
 
     return train_dataloader, class_names

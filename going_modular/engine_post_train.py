@@ -122,15 +122,11 @@ def test_step(model: torch.nn.Module,
 
             # out looks like this: tensor([a, b, c, d])
             out = model(X).squeeze(dim=1)
-            # print('out is: ', out)
 
             # Calculate and accumulate accuracy metric across all batches for regression head
             # y_pred looks like this: tensor([a, b, c, d])
             y_pred = reg_classify(out, device=device).to(device)
-            # print('y_pred is: ', y_pred)
-            # print('y is: ', y)
             acc += (y_pred == y).sum().item()/len(y)
-            # print('acc is: ', acc)
 
 
     # Adjust metrics to get average loss and accuracy per batch 
