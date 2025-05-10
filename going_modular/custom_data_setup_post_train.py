@@ -5,7 +5,7 @@ from going_modular.ThreeHeadCNN import ThreeHeadCNN
 import albumentations as A
 from sklearn.model_selection import KFold
 
-NUM_WORKERS = 0
+NUM_WORKERS = 4
 
 class LoadDataset(Dataset):
     def __init__(self, model, dataloader, device):
@@ -54,8 +54,8 @@ def create_train_val_dataloader(
         train_subset = Subset(train_dataset, train_idx)
         val_subset = Subset(train_dataset, val_idx)
 
-        train_dataloader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
-        val_dataloader = DataLoader(val_subset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+        train_dataloader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
+        val_dataloader = DataLoader(val_subset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
 
         fold = {
                 'train_dataloader': train_dataloader,

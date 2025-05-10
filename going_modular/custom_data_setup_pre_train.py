@@ -10,7 +10,7 @@ APTOS_train_csv_file = "../../APTOS/labels/trainLabels15.csv"
 APTOS_test_image_folder = "../../APTOS/resized_test_15"
 APTOS_test_csv_file = "../../APTOS/labels/testLabels15.csv"  
 
-NUM_WORKERS = 0
+NUM_WORKERS = 4
     
 class LoadDataset(Dataset):
     def __init__(self, image_folder, csv_file, transform=None):
@@ -53,7 +53,7 @@ def create_train_dataloader(
     # Get class names
     class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
 
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=False, pin_memory=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
 
     return train_dataloader, class_names
 
@@ -73,6 +73,6 @@ def create_test_dataloader(
     # Get class names
     class_names = ['No DR', 'Mild DR', 'Moderate DR', 'Severe DR', 'Proliferative DR']
 
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, persistent_workers=False, pin_memory=True)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=NUM_WORKERS, persistent_workers=True, pin_memory=True)
 
     return test_dataloader, class_names
