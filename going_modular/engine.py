@@ -49,7 +49,8 @@ def train_step(model: torch.nn.Module,
 
         with torch.autocast(device_type=device, dtype=torch.float16, enabled=True):
 
-            class_out, reg_out, ord_out, enc_out = model(X)
+            class_out, reg_out, ord_out, enc_out, final_out = model(X)
+            # print('reg out:', reg_out)
 
             loss_classification = loss_fn_classification(class_out, y)
             loss_regression = loss_fn_regression(reg_out, y.float())
@@ -109,7 +110,7 @@ def val_step(model: torch.nn.Module,
             X, y = X.to(device), y.to(device)
 
             # 1. Forward pass
-            class_out, reg_out, ord_out, enc_out = model(X)
+            class_out, reg_out, ord_out, enc_out, fianl_out = model(X)
         
             # 1. One hot encoded for ordinal regression
             num_classes = 5
@@ -173,8 +174,9 @@ def test_step(model: torch.nn.Module,
             X, y = X.to(device), y.to(device)
 
             # 1. Forward pass
-            class_out, reg_out, ord_out, enc_out = model(X)
-        
+            class_out, reg_out, ord_out, enc_out, final_out = model(X)
+            # print('reg out:', reg_out)
+
             # 1. One hot encoded for ordinal regression
             num_classes = 5
             y_cumulative = ordinal_labels(y, num_classes)
@@ -342,6 +344,9 @@ def calculate_F1_score_multiclass(y_pred_class, y_pred_reg, y_pred_ord, y, num_c
     f1 = MulticlassF1Score(num_classes=num_classes, average='none')  # 'macro', 'micro', or 'weighted', or 'none' for F1 score for each class
 
     f1_results = {'f1_class': 0, 'f1_reg': 0, 'f1_ord': 0}
+
+    # print(y_pred_reg)
+    # print(y)
 
     f1_results["f1_class"] = f1(y_pred_class, y)
     f1_results["f1_reg"] = f1(y_pred_reg, y)

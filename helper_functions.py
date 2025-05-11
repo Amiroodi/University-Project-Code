@@ -3,7 +3,6 @@ A series of helper functions used throughout the course.
 """
 
 import torch
-from torch import nn
 import torchvision
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +11,7 @@ from sklearn.manifold import TSNE
 from matplotlib.patches import Patch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-
+import random
 
 def print_train_time(start, end, device=None):
     """Prints difference between start and end time.
@@ -29,13 +28,12 @@ def print_train_time(start, end, device=None):
     print(f"\nTrain time on {device}: {total_time:.3f} seconds")
     return total_time
 
-def plot_loss_curves_post_train(train_results, val_results):
+def plot_loss_curves_post_train(train_results):
 
     epochs = range(len(train_results["loss_train"]))
 
     plt.figure(figsize=(18, 9))
     plt.plot(epochs, train_results['loss_train'], label="loss_train", color='blue')
-    plt.plot(epochs, val_results['loss_val'], label="loss_val", color='blue', linestyle='dotted')
     plt.xlabel("Epochs")
     plt.legend(loc='upper right')
     plt.show()
@@ -175,7 +173,7 @@ def plot_t_SNE(
     with torch.no_grad():
         for X, y in dataloader:
             X = X.to(device)
-            class_out, reg_out, ord_out, enc_out = model(X)  # Extract last-layer features
+            class_out, reg_out, ord_out, enc_out, final_out = model(X)  # Extract last-layer features
             features.append(enc_out.cpu().numpy())  # Move to CPU
             labels.append(y.numpy())
 
@@ -225,15 +223,15 @@ def plot_t_SNE(
         plt.tight_layout()
         plt.show()
 
-def get_augmentation_A_transforms(p):
-    A_transforms = A.Compose([ 
+def get_augmentation_train_transforms(p=1):
+    return A.Compose([
         A.Resize(240, 240),
         A.OpticalDistortion(distort_limit=0.3, p=p),
         A.GridDistortion(num_steps=5, distort_limit=0.3, p=p),
         A.ElasticTransform(alpha=40, sigma=50, p=p),
         A.Affine(scale=[0.7, 1.4], translate_percent=[-0.05, 0.05], shear=[-15, 15], rotate=[-45, 45], p=p),
-        A.HorizontalFlip(p=0.4), 
-        A.VerticalFlip(p=0.4), 
+        A.HorizontalFlip(p=p), 
+        A.VerticalFlip(p=p), 
         A.RGBShift(r_shift_limit=30, g_shift_limit=30, b_shift_limit=30, p=p),  
         A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=p),  
         A.AdditiveNoise(noise_type='gaussian', spatial_mode='shared', approximation=1.0, noise_params={"mean_range": (0.0, 0.0), "std_range": (0.01, 0.02)}, p=p),
@@ -242,16 +240,36 @@ def get_augmentation_A_transforms(p):
         A.Emboss(alpha=(0.5, 0.6), strength=(0.6, 0.7), p=p),  
         A.RandomGamma(gamma_limit=(80, 120), p=p),  
         A.CoarseDropout(num_holes_range=(1, 2), hole_height_range=(0.1, 0.2), hole_width_range=(0.1, 0.2), fill=0, fill_mask=None, p=p),
-        # A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         A.ToFloat(),
-        ToTensorV2()], seed=33)
-    
-    return A_transforms
+        ToTensorV2()
+    ], seed=33)
 
 def get_augmentation_no_transforms():
-    no_transforms = A.Compose([
+    return A.Compose([
     A.Resize(240, 240),       
     A.ToFloat(),
     ToTensorV2()], seed=33)
 
-    return no_transforms
+def get_augmentation_test_transforms(p=1):
+    return A.Compose([
+        A.Resize(240, 240),
+        # A.OpticalDistortion(distort_limit=0.3, p=p),
+        # A.GridDistortion(num_steps=5, distort_limit=0.3, p=p),
+        # A.ElasticTransform(alpha=40, sigma=50, p=p),
+        # A.Affine(scale=[0.7, 1.4], translate_percent=[-0.05, 0.05], shear=[-15, 15], rotate=[-45, 45], p=p),
+        A.HorizontalFlip(p=0.4), 
+        A.VerticalFlip(p=0.4), 
+        # A.RGBShift(r_shift_limit=30, g_shift_limit=30, b_shift_limit=30, p=p),  
+        # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=p),  
+        # A.AdditiveNoise(noise_type='gaussian', spatial_mode='shared', approximation=1.0, noise_params={"mean_range": (0.0, 0.0), "std_range": (0.01, 0.02)}, p=p),
+        # A.GaussianBlur(blur_limit=1, p=p), 
+        # A.Sharpen(alpha=(0.2, 0.5), lightness=(0.5, 1.0), p=p),  
+        # A.Emboss(alpha=(0.5, 0.6), strength=(0.6, 0.7), p=p),  
+        # A.RandomGamma(gamma_limit=(80, 120), p=p),  
+        # A.CoarseDropout(num_holes_range=(1, 2), hole_height_range=(0.1, 0.2), hole_width_range=(0.1, 0.2), fill=0, fill_mask=None, p=p),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        A.ToFloat(),
+        ToTensorV2()
+    ], seed=33)
+

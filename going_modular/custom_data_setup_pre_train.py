@@ -4,11 +4,11 @@ from torch.utils.data import Dataset, DataLoader, Subset
 import albumentations as A
 import cv2
 
-APTOS_train_image_folder = "../../APTOS/resized_train_15"
-APTOS_train_csv_file = "../../APTOS/labels/trainLabels15.csv"  
+APTOS_train_image_folder = "../APTOS/resized_train_15"
+APTOS_train_csv_file = "../APTOS/labels/trainLabels15.csv"  
 
-APTOS_test_image_folder = "../../APTOS/resized_test_15"
-APTOS_test_csv_file = "../../APTOS/labels/testLabels15.csv"  
+APTOS_test_image_folder = "../APTOS/resized_test_15"
+APTOS_test_csv_file = "../APTOS/labels/testLabels15.csv"  
 
 NUM_WORKERS = 4
     

@@ -2,9 +2,17 @@ import torch
 import torchvision
 from torch import nn
 
+def reg_classify(x, device):
+    bins = torch.tensor([0.5, 1.5, 2.5, 3.5]).to(device)  # Class boundaries
+    # Classify using bucketize
+    classified = torch.bucketize(x, bins, right=False)  # right=False ensures correct bin placement
+    return classified
+
 class ThreeHeadCNN(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(ThreeHeadCNN, self).__init__()
+
+        self.device = device
 
         # Load EfficientNet encoder
         weights = torchvision.models.EfficientNet_B1_Weights.DEFAULT
@@ -45,6 +53,11 @@ class ThreeHeadCNN(nn.Module):
             nn.Linear(128, 5) # 5 output nodes for ordinal regression
         )
 
+        # Final regression head
+        self.final_head = nn.Sequential(
+            nn.Linear(11, 1)
+        )
+
     def forward(self, x):
         x = self.encoder(x) # Extract features
 
@@ -70,6 +83,26 @@ class ThreeHeadCNN(nn.Module):
         # Ordinal regression branch
         ord_out = self.ordinal_head(x)
 
-        return class_out, reg_out, ord_out, enc_out
+        # Final regression head branch
+        y_pred_class = (torch.argmax(torch.softmax(class_out, dim=1), dim=1))
+        y_pred_reg = (reg_classify(reg_out, device=self.device).to(self.device))
+        y_pred_ord = (torch.sum(torch.round(torch.sigmoid(ord_out)), dim=1, keepdim=True).squeeze(dim=1) - 1)
+
+        # y_pred_class = torch.softmax(class_out, dim=1)
+        # y_pred_reg = reg_classify(reg_out, device=self.device).to(self.device)
+        # y_pred_ord = torch.sigmoid(ord_out)
+
+        # print('y_pred_class is :', y_pred_class)
+        # print('y_pred_reg is :', y_pred_reg)
+        # print('y_pred_ord is :', y_pred_ord)
+
+        x = torch.stack((y_pred_class, y_pred_reg, y_pred_ord), dim=1)
+
+        final_out = self.final_head(x).squeeze(dim=1)
+
+        # print('x is: ', x)
+        # print('final_out is: ', final_out)
+
+        return class_out, reg_out, ord_out, enc_out, final_out
 
     
