@@ -226,10 +226,10 @@ def plot_t_SNE(
 def get_augmentation_train_transforms(p=1):
     return A.Compose([
         A.Resize(240, 240),
-        A.OpticalDistortion(distort_limit=0.3, p=0.1),
-        A.GridDistortion(num_steps=5, distort_limit=0.3, p=0.1),
-        A.ElasticTransform(alpha=40, sigma=50, p=0.1),
-        A.Affine(scale=[0.7, 1.4], translate_percent=[-0.05, 0.05], shear=[-15, 15], rotate=[-45, 45], p=0.2),
+        A.OpticalDistortion(distort_limit=0.3, p=p),
+        A.GridDistortion(num_steps=5, distort_limit=0.3, p=p),
+        A.ElasticTransform(alpha=40, sigma=50, p=p),
+        A.Affine(scale=[0.7, 1.4], translate_percent=[-0.05, 0.05], shear=[-15, 15], rotate=[-45, 45], p=p),
         A.HorizontalFlip(p=0.5), 
         A.VerticalFlip(p=0.5), 
         A.RGBShift(r_shift_limit=30, g_shift_limit=30, b_shift_limit=30, p=p),  

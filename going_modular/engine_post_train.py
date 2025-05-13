@@ -8,6 +8,7 @@ from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
 from torchmetrics.classification import MulticlassF1Score
 from torchmetrics.classification import MulticlassCohenKappa
+from torchmetrics import CohenKappa
 
 scalar = torch.amp.GradScaler('cuda', enabled=True)
 
@@ -74,7 +75,8 @@ def test_step(model: torch.nn.Module,
     total_f1_score_per_class, total_f1_score_macro = 0, 0
 
     QWK_score = 0
-    QWK_metric = MulticlassCohenKappa(num_classes=5).to(device)
+    QWK_metric = MulticlassCohenKappa(num_classes=5, weights='quadratic').to(device)
+    # QWK_metric = CohenKappa(num_classes=5, weights='quadratic')
 
     # Turn on inference context manager
     with torch.inference_mode():
