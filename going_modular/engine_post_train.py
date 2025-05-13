@@ -71,7 +71,7 @@ def test_step(model: torch.nn.Module,
 
     total_loss = 0
     acc = 0
-    total_f1_score = 0
+    total_f1_score_per_class, total_f1_score_macro = 0, 0
 
     QWK_score = 0
     QWK_metric = MulticlassCohenKappa(num_classes=5).to(device)
@@ -99,12 +99,15 @@ def test_step(model: torch.nn.Module,
             # print(final_out)
             # print(y_pred_final.squeeze(dim=1))
             # print(y)
-            f1_score = calculate_F1_score_multiclass(y_pred_final=y_pred_final.cpu(), y=y.cpu())
-            total_f1_score += f1_score
+            f1_score_per_class, f1_score_macro = calculate_F1_score_multiclass(y_pred_final=y_pred_final.cpu(), y=y.cpu())
+
+            total_f1_score_per_class += f1_score_per_class
+            total_f1_score_macro += f1_score_macro
 
             QWK_score += QWK_metric(y_pred_final, y)
 
-    print(f'f1_score: {total_f1_score / len(dataloader)}')
+    print(f'f1_score_per_class: {total_f1_score_per_class / len(dataloader)}')
+    print(f'f1_score_macro (unweighted average): {total_f1_score_macro / len(dataloader)}')
 
     # Adjust metrics to get average loss and accuracy per batch 
     acc /= len(dataloader) 
@@ -152,11 +155,14 @@ def train(
 
 def calculate_F1_score_multiclass(y_pred_final, y, num_classes=5):
 
-    f1 = MulticlassF1Score(num_classes=num_classes, average='none')  # 'macro', 'micro', or 'weighted', or 'none' for F1 score for each class
+    f1_per_class = MulticlassF1Score(num_classes=num_classes, average='none')  # 'macro', 'micro', or 'weighted', or 'none' for F1 score for each class
+    f1_macro = MulticlassF1Score(num_classes=num_classes, average='macro')  # 'macro', 'micro', or 'weighted', or 'none' for F1 score for each class
 
-    f1_result = f1(y_pred_final, y)
 
-    return f1_result
+    f1_result_per_class = f1_per_class(y_pred_final, y)
+    f1_result_macro = f1_macro(y_pred_final, y)
+
+    return f1_result_per_class, f1_result_macro
 
 def calculate_F1_score_binary(y_pred_final, y, num_classes=2):
 

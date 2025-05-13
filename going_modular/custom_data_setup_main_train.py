@@ -87,8 +87,16 @@ def LoadDataset_train_test_split(transform, shrink_size):
     splitter = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
     train_idx, test_idx = next(splitter.split(range(len(combined_dataset)), labels))
 
+    # print('train_idx: ', train_idx)
+    # print('test_idx: ', test_idx)
+
     train_dataset = Subset(combined_dataset, train_idx)
     test_dataset = Subset(combined_dataset, test_idx)
+
+    # for i in range(len(train_dataset)):
+    #     print('train label is: ', train_dataset[i][1])
+    # for i in range(len(test_dataset)):
+    #     print('test label is: ', test_dataset[i][1])
 
     return train_dataset, test_dataset
 

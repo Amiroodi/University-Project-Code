@@ -181,7 +181,7 @@ def plot_t_SNE(
     labels = np.concatenate(labels, axis=0)
 
     # Apply t-SNE
-    perp_vals = [10,20]
+    perp_vals = [10,40]
     for perp in perp_vals:
         tsne = TSNE(n_components=2, perplexity=perp, random_state=45)
         features_2d = tsne.fit_transform(features)
@@ -226,20 +226,20 @@ def plot_t_SNE(
 def get_augmentation_train_transforms(p=1):
     return A.Compose([
         A.Resize(240, 240),
-        A.OpticalDistortion(distort_limit=0.3, p=p),
-        A.GridDistortion(num_steps=5, distort_limit=0.3, p=p),
-        A.ElasticTransform(alpha=40, sigma=50, p=p),
-        A.Affine(scale=[0.7, 1.4], translate_percent=[-0.05, 0.05], shear=[-15, 15], rotate=[-45, 45], p=p),
-        A.HorizontalFlip(p=p), 
-        A.VerticalFlip(p=p), 
+        A.OpticalDistortion(distort_limit=0.3, p=0.1),
+        A.GridDistortion(num_steps=5, distort_limit=0.3, p=0.1),
+        A.ElasticTransform(alpha=40, sigma=50, p=0.1),
+        A.Affine(scale=[0.7, 1.4], translate_percent=[-0.05, 0.05], shear=[-15, 15], rotate=[-45, 45], p=0.2),
+        A.HorizontalFlip(p=0.5), 
+        A.VerticalFlip(p=0.5), 
         A.RGBShift(r_shift_limit=30, g_shift_limit=30, b_shift_limit=30, p=p),  
         A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=p),  
-        A.AdditiveNoise(noise_type='gaussian', spatial_mode='shared', approximation=1.0, noise_params={"mean_range": (0.0, 0.0), "std_range": (0.01, 0.02)}, p=p),
-        A.GaussianBlur(blur_limit=1, p=p), 
+        A.AdditiveNoise(noise_type='gaussian', spatial_mode='shared', approximation=1.0, noise_params={"mean_range": (0.0, 0.0), "std_range": (0.01, 0.02)}, p=0.1),
+        A.GaussianBlur(blur_limit=1, p=0.1), 
         A.Sharpen(alpha=(0.2, 0.5), lightness=(0.5, 1.0), p=p),  
         A.Emboss(alpha=(0.5, 0.6), strength=(0.6, 0.7), p=p),  
         A.RandomGamma(gamma_limit=(80, 120), p=p),  
-        A.CoarseDropout(num_holes_range=(1, 2), hole_height_range=(0.1, 0.2), hole_width_range=(0.1, 0.2), fill=0, fill_mask=None, p=p),
+        A.CoarseDropout(num_holes_range=(1, 2), hole_height_range=(0.1, 0.2), hole_width_range=(0.1, 0.2), fill=0, fill_mask=None, p=0.2),
         A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
         A.ToFloat(),
         ToTensorV2()

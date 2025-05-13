@@ -27,35 +27,38 @@ class ThreeHeadCNN(nn.Module):
         self.batch_norm_1= nn.BatchNorm1d(1280) 
         self.batch_norm_2= nn.BatchNorm1d(1280)
 
-        self.dense1 = nn.Linear(1280 * 2, 512)
+        self.dense1 = nn.Linear(1280 * 2, 1024)
 
         # Classification head
         self.classification_head = nn.Sequential(
-            nn.Linear(512, 128),
-            nn.ReLU(),
-            nn.Dropout(p=0.3),
-            nn.Linear(128, 5) # 5 output nodes for classification
-        )
+                                    nn.Linear(1024, 128),
+                                    nn.ReLU(),
+                                    nn.Dropout(p=0.3),
+                                    nn.Linear(128, 5) # 5 output nodes for classification
+                                    )
+        
 
         # Regression head
         self.regression_head = nn.Sequential(
-            nn.Linear(512, 128),
-            nn.ReLU(),
-            nn.Dropout(p=0.3),
-            nn.Linear(128, 1) # 1 output node is for regression
-        )
+                                   nn.Linear(1024, 128),
+                                    nn.ReLU(),
+                                    nn.Dropout(p=0.3),
+                                    nn.Linear(128, 1) # 5 output nodes for classification
+                                    )
+        
 
         # Ordinal regression head
         self.ordinal_head = nn.Sequential(
-            nn.Linear(512, 128),
-            nn.ReLU(),
-            nn.Dropout(p=0.3),
-            nn.Linear(128, 5) # 5 output nodes for ordinal regression
-        )
+                                   nn.Linear(1024, 128),
+                                    nn.ReLU(),
+                                    nn.Dropout(p=0.3),
+                                    nn.Linear(128, 5) # 5 output nodes for classification
+                                    )
+        
 
         # Final regression head
         self.final_head = nn.Sequential(
-            nn.Linear(11, 1)
+            nn.Linear(3, 1)
         )
 
     def forward(self, x):
