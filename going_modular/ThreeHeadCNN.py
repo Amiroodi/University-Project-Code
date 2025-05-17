@@ -9,14 +9,15 @@ def reg_classify(x, device):
     return classified
 
 class ThreeHeadCNN(nn.Module):
-    def __init__(self, device):
+    def __init__(self, device, p_dropout):
         super(ThreeHeadCNN, self).__init__()
 
         self.device = device
+        self.p_dropout = p_dropout
 
         # Load EfficientNet encoder
-        weights = torchvision.models.EfficientNet_B4_Weights.DEFAULT
-        efficientNet = torchvision.models.efficientnet_b4(weights=weights)
+        weights = torchvision.models.EfficientNet_B1_Weights.DEFAULT
+        efficientNet = torchvision.models.efficientnet_b1(weights=weights)
         self.encoder = efficientNet.features
 
         # Pooling layers
@@ -24,36 +25,36 @@ class ThreeHeadCNN(nn.Module):
         self.global_avg_pool = nn.AdaptiveAvgPool2d(1)
 
         # Fully connected layers
-        self.batch_norm_1= nn.BatchNorm1d(1792) 
-        self.batch_norm_2= nn.BatchNorm1d(1792)
+        self.batch_norm_1= nn.BatchNorm1d(1280) 
+        self.batch_norm_2= nn.BatchNorm1d(1280)
 
-        self.dense1 = nn.Linear(1792 * 2, 1024)
+        self.dense1 = nn.Linear(1280 * 2, 512)
 
         # Classification head
         self.classification_head = nn.Sequential(
-                                    nn.Linear(1024, 128),
-                                    nn.ReLU(),
-                                    nn.Dropout(p=0.3),
-                                    nn.Linear(128, 5) # 5 output nodes for classification
-                                    )
+            nn.Linear(512, 64),
+            nn.ReLU(),
+            nn.Dropout(p=self.p_dropout),
+            nn.Linear(64, 5) # 5 output nodes for classification
+            )
         
 
         # Regression head
         self.regression_head = nn.Sequential(
-                                   nn.Linear(1024, 128),
-                                    nn.ReLU(),
-                                    nn.Dropout(p=0.3),
-                                    nn.Linear(128, 1) # 5 output nodes for classification
-                                    )
+            nn.Linear(512, 64),
+            nn.ReLU(),
+            nn.Dropout(p=self.p_dropout),
+            nn.Linear(64, 1) # 5 output nodes for classification
+            )
         
 
         # Ordinal regression head
         self.ordinal_head = nn.Sequential(
-                                   nn.Linear(1024, 128),
-                                    nn.ReLU(),
-                                    nn.Dropout(p=0.3),
-                                    nn.Linear(128, 5) # 5 output nodes for classification
-                                    )
+            nn.Linear(512, 64),
+            nn.ReLU(),
+            nn.Dropout(p=self.p_dropout),
+            nn.Linear(64, 5) # 5 output nodes for classification
+            )
         
 
         # Final regression head
