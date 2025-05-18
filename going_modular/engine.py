@@ -35,8 +35,9 @@ def train_step(model: torch.nn.Module,
     # Put model in train mode
     model.train()
 
+    total = 0
     total_class_loss, total_reg_loss, total_ord_loss = 0, 0, 0
-    class_acc, reg_acc, ord_acc = 0, 0, 0
+    correct_class, correct_reg, correct_ord = 0, 0, 0
 
     for batch, (X, y) in enumerate(dataloader):
         # Send data to target device
@@ -68,27 +69,39 @@ def train_step(model: torch.nn.Module,
         # 3. Optimizer zero grad
         optimizer.zero_grad(set_to_none=True)
 
+        total += y.size(0)
+
         # Calculate and accumulate accuracy metric across all batches for classification head
         total_class_loss += loss_classification.item()
         y_pred_class = torch.argmax(torch.softmax(class_out, dim=1), dim=1)
-        class_acc += (y_pred_class == y).sum().item()/len(y)
+        correct_class += (y_pred_class == y).sum().item()
+        # class_acc += (y_pred_class == y).sum().item()/len(y)
 
         # Calculate and accumulate accuracy metric across all batches for regression head
         total_reg_loss += loss_regression.item()
         y_pred_reg = reg_classify(reg_out, device=device).to(device)
-        reg_acc += (y_pred_reg == y).sum().item()/len(y)
+        correct_reg += (y_pred_reg == y).sum().item()
+        # reg_acc += (y_pred_reg == y).sum().item()/len(y)
 
         # Calculate and accumulate accuracy metric across all batches for ordinal regression head
         total_ord_loss += loss_ordinal.item()
         y_pred_ord = torch.sum(torch.round(torch.sigmoid(ord_out)), dim=1, keepdim=True).squeeze(dim=1) - 1
-        ord_acc += (y_pred_ord == y).sum().item()/len(y)
+        correct_ord += (y_pred_ord == y).sum().item()
+        # ord_acc += (y_pred_ord == y).sum().item()/len(y)
 
     # Adjust metrics to get average loss and accuracy per batch 
     total_class_loss = total_class_loss / len(dataloader)
     total_reg_loss = total_reg_loss / len(dataloader)
     total_ord_loss = total_ord_loss / len(dataloader)
 
-    return total_class_loss, total_reg_loss, total_ord_loss
+    class_acc = correct_class / total
+    reg_acc = correct_reg / total
+    ord_acc = correct_ord / total
+
+    accs = [class_acc, reg_acc, ord_acc]
+    losses = [total_class_loss, total_reg_loss, total_ord_loss]
+
+    return losses, accs
 
 def val_step(model: torch.nn.Module, 
               dataloader: torch.utils.data.DataLoader, 
@@ -247,7 +260,7 @@ def train(
 
     # Loop through training and testing steps for a number of epochs
     for epoch in tqdm(range(epochs)):
-        loss_classification_train, loss_regression_train, loss_ordinal_train = train_step(
+        train_losses, train_accs = train_step(
             model=model,
             dataloader=train_dataloader,
             loss_fn_classification=loss_fn_classification,
@@ -257,7 +270,7 @@ def train(
             scheduler=scheduler,
             device=device)
 
-        losses, accs = val_step(
+        val_losses, val_accs = val_step(
             model=model,
             dataloader=val_dataloader,
             loss_fn_classification=loss_fn_classification,
@@ -265,8 +278,11 @@ def train(
             loss_fn_ordinal=loss_fn_ordinal,
             device=device)
         
-        loss_classification_val, loss_regression_val, loss_ordinal_val = losses
-        acc_classification_val, acc_regression_val, acc_ordinal_val = accs
+        loss_classification_train, loss_regression_train, loss_ordinal_train = train_losses
+        acc_classification_train, acc_regression_train, acc_ordinal_train = train_accs
+
+        loss_classification_val, loss_regression_val, loss_ordinal_val = val_losses
+        acc_classification_val, acc_regression_val, acc_ordinal_val = val_accs
 
         # Print out what's happening
         if epoch % 5 == 0:
